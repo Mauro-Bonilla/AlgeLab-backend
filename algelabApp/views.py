@@ -99,15 +99,7 @@ def create_jwt_token(user):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_user_info(request):
-    user = request.user
-    return JsonResponse({
-        'user_id': user.id,
-        'username': user.username,
-        'email': user.email,
-        'first_name': user.first_name,
-        'last_name': user.last_name,
-        'avatar_url': user.profile.avatar_url if hasattr(user, 'profile') else '',
-    })
+    return JsonResponse({'user_id': request.user.id, 'username': request.user.username})
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
