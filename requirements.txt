@@ -1,0 +1,26 @@
+# Django Web Framework
+Django>=4.2,<5.0
+
+# Django REST Framework for building APIs
+djangorestframework>=3.14,<4.0
+
+# JSON Web Token Authentication
+PyJWT>=2.6,<3.0
+
+# HTTP Requests Library
+requests>=2.31,<3.0
+
+# Handling Cross-Origin Resource Sharing (CORS)
+django-cors-headers>=3.14,<4.0
+
+# Swagger Documentation for APIs
+drf-yasg>=1.21,<2.0
+
+# Environment Variables from .env File
+python-dotenv>=1.0,<2.0
+
+# Utility for generating random secret keys
+django-environ>=0.10,<0.11
+
+# Other dependencies (if any)
+cryptography>=41.0,<42.0  # Required by PyJWT for certain algorithms
