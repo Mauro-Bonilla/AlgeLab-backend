@@ -1,5 +1,3 @@
-# algelabApp/views.py
-
 import logging
 import requests
 from django.conf import settings
@@ -9,6 +7,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import get_user_model
+from .models import Profile
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -77,16 +76,21 @@ def github_callback(request):
         return JsonResponse({"error": "Invalid user info response from GitHub"}, status=500)
     
     user, created = User.objects.get_or_create(username=user_data['login'])
+    
+    # Update or create user profile
+    profile, _ = Profile.objects.get_or_create(user=user)
+    profile.github_username = user_data['login']
+    profile.save()
+    
     jwt_token = create_jwt_token(user)
     
-    # Set the JWT token in an HttpOnly cookie
     response = redirect(settings.FRONTEND_URL + '/anh-algelab')
     response.set_cookie(
         'jwt_token',
         jwt_token,
-        max_age=3600,  # 1 hour
+        max_age=3600,
         httponly=True,
-        secure=settings.JWT_COOKIE_SECURE,  # True in production with HTTPS
+        secure=settings.JWT_COOKIE_SECURE,
         samesite=settings.JWT_COOKIE_SAMESITE,
         path='/',
     )
@@ -99,7 +103,13 @@ def create_jwt_token(user):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_user_info(request):
-    return JsonResponse({'user_id': request.user.id, 'username': request.user.username})
+    return JsonResponse({
+        'user_id': request.user.id,
+        'username': request.user.username,
+        'avatar_url': request.user.profile.avatar_url,
+        'first_name': request.user.first_name,
+        'last_name': request.user.last_name,
+    })
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -116,7 +126,6 @@ def validate_token(request):
         return JsonResponse({"valid": False, "error": "No token provided"}, status=401)
     
     try:
-        # This will raise an exception if the token is invalid
         RefreshToken(token)
         return JsonResponse({"valid": True}, status=200)
     except Exception as e:
