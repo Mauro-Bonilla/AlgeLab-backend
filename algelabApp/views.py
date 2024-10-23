@@ -19,6 +19,7 @@ def github_login(request):
         f'https://github.com/login/oauth/authorize'
         f'?client_id={settings.GITHUB_CLIENT_ID}'
         f'&redirect_uri={settings.GITHUB_REDIRECT_URI}'
+        f'&scope=user'  # Optionally request specific scopes
     )
     return JsonResponse({'login_url': github_login_url})
 
