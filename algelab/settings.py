@@ -57,7 +57,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.environ.get('DB_NAME', 'django-postgres'),
         'USER': os.environ.get('DB_USER', 'postgresalgelab'),
-        'PASSWORD': os.environ.get('DB_PASSWORD', 'Azure55312!'),
+        'PASSWORD': os.environ.get('DB_PASSWORD'),
         'HOST': os.environ.get('DB_HOST', 'algelab-postgres.postgres.database.azure.com'),
         'PORT': os.environ.get('DB_PORT', '5432'),
         'OPTIONS': {

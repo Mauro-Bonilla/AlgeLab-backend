@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    image: algelab-django
+    container_name: algelab-django
+    ports:
+      - "8000:8000"
+    volumes:
+      - type: bind
+        source: .
+        target: /app
+      - type: bind
+        source: ./algelab-sso.2024-10-02.private-key.pem
+        target: /app/algelab-sso.2024-10-02.private-key.pem
+        read_only: true
+    environment:
+      # Environment Type
+      - ENVIRONMENT=development
+      - DEBUG=True
+      - SECRET_KEY=232WF423R21R5GHYVQR2312D354YH__?l
+      
+      # Hosts and URLs
+      - ALLOWED_HOSTS=*
+      - SWAGGER_API_URL=http://localhost:8000
+      - FRONTEND_URL=http://localhost:5173
+      
+      # CORS and Security
+      - CORS_ALLOWED_ORIGINS=http://localhost:5173,http://192.168.1.69:5173
+      - CSRF_TRUSTED_ORIGINS=http://localhost:5173,http://192.168.1.69:5173
+      
+      # Security Settings
+      - SECURE_SSL_REDIRECT=False
+      - SECURE_PROXY_SSL_HEADER=
+      
+      # Cookie Settings
+      - SESSION_COOKIE_SECURE=False
+      - CSRF_COOKIE_SECURE=False
+      - JWT_COOKIE_SECURE=False
+      - JWT_COOKIE_SAMESITE=Lax
+      
+      # Database Configuration
+      - DB_NAME=django-postgres
+      - DB_USER=postgresalgelab@algelab-postgres
+      - DB_PASSWORD=Algelab123!
+      - DB_HOST=algelab-postgres.postgres.database.azure.com
+      - DB_PORT=5432
+      
+      # GitHub Configuration
+      - GITHUB_APP_ID=985507
+      - GITHUB_CLIENT_ID=Iv23litQVCBtZvJXrWuG
+      - GITHUB_CLIENT_SECRET=c4e4b2805b3e92272bbe70f13c5e060d96b5df0b
+      - GITHUB_REDIRECT_URI=http://localhost:8000/api/auth/github/callback
+      - GITHUB_PRIVATE_KEY_PATH=./algelab-sso.2024-10-02.private-key.pem
+      
+      # Django Settings
+      - DJANGO_SETTINGS_MODULE=algelab.settings
+    networks:
+      - algelab-network
+
+networks:
+  algelab-network:
+    name: algelab-network
+    driver: bridge
