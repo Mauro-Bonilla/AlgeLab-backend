@@ -2,7 +2,7 @@
 
 ![Static Badge](https://img.shields.io/badge/Python-3.11-blue)
 ![GitHub](https://img.shields.io/badge/license-MIT-green)
-[![Discord](https://img.shields.io/discord/1234567890?color=7289da&label=Discord&logo=discord&logoColor=white)](https://discord.gg/4SRmKVZb8V)
+[![Discord](https://img.shields.io/discord/YOUR_SERVER_ID?color=7289da&label=Discord&logo=discord&logoColor=white)](https://discord.gg/4SRmKVZb8V)
 
 AlgeLab is an open-source web platform designed to enhance linear algebra learning through virtual laboratories, multimedia learning principles, and gamification strategies.
 
