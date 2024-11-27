@@ -77,10 +77,6 @@ We welcome contributions! Please read our documentation for contribution guideli
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Research Paper
-
-This project is based on research conducted at Universidad Anáhuac México. For detailed information about the theoretical framework and educational principles, please refer to the original paper.
-
 ## Contact
 
 For project inquiries:
