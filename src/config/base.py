@@ -1,16 +1,18 @@
 import os
 from typing import List, Optional, Union
-from pydantic import BaseSettings, field_validator, EmailStr, Field
+from pydantic_settings import BaseSettings
+from pydantic import field_validator, EmailStr, Field
+from pathlib import Path
 
-from src.config import BASE_DIR
+from src.config.constants import BASE_DIR
 
 
 class Settings(BaseSettings):
     """
     Base settings for the application
 
-    This settings are used to configure all the aplication.
-    Enviroment specific settings will override this settings.
+    These settings are used to configure all the application.
+    Environment-specific settings will override these settings.
     """
     # Project metadata
     PROJECT_NAME: str = "AlgeLab"
@@ -19,6 +21,7 @@ class Settings(BaseSettings):
     
     # Debugging
     DEBUG: bool = False
+    SHOW_SWAGGER: bool = Field(..., description="Show Swagger UI for API documentation")
     
     # API prefix
     API_PREFIX: str = "/api"
@@ -36,9 +39,18 @@ class Settings(BaseSettings):
     CORS_ALLOW_HEADERS: List[str] = ["*"]
     
     # Supabase settings
-    SUPABASE_URL: str = Field(..., description="Supabase project URL")
-    SUPABASE_KEY: str = Field(..., description="Supabase anon/public key")
-    SUPABASE_SERVICE_KEY: Optional[str] = Field(None, description="Supabase service role key")
+    SUPABASE_URL: str = Field(..., description="Postgres project URL")
+    POSTGRES_URL: str = Field(..., description="Supabase project URL")
+    POSTGRES_PRISMA_URL: str = Field(..., description="Prisma project URL")
+    NEXT_PUBLIC_SUPABASE_URL: str = Field(..., description="Next Prisma Public project URL")
+    POSTGRES_URL_NON_POOLING: str = Field(..., description="Non-pooling Postgres URL")
+    SUPABASE_JWT_SECRET: str = Field(..., description="Supabase JWT secret")
+    POSTGRES_USER: str = Field("postgres", description="Postgres user")
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: str = Field(..., description="Next Prisma Public anon key")
+    POSTGRES_PASSWORD: str = Field(..., description="Postgres password")
+    POSTGRES_DATABASE: str = Field("postgres", description="Postgres database")
+    SUPABASE_SERVICE_ROLE_KEY: str = Field(..., description="Supabase service role key")
+    POSTGRES_HOST: str = Field(..., description="Postgres host")
     
     # GitHub OAuth
     GITHUB_APP_ID: Optional[str] = None
@@ -72,13 +84,15 @@ class Settings(BaseSettings):
     EMAIL_SENDER_NAME: Optional[str] = None
     
     # Custom validators
-    @field_validator("CORS_ALLOWED_ORIGINS", pre=True)
+    @field_validator("CORS_ALLOWED_ORIGINS", mode="before")  # Updated decorator
     def assemble_cors_origins(cls, v: Union[str, List[str]]) -> List[str]:
         """Parse CORS_ALLOWED_ORIGINS from string to list."""
         if isinstance(v, str) and not v.startswith("["):
             return [i.strip() for i in v.split(",")]
         elif isinstance(v, (list, str)):
-            return v
+            if all(isinstance(i, str) for i in v):
+                return v
+            raise ValueError("All elements in CORS_ALLOWED_ORIGINS must be strings")
         raise ValueError(v)
     
     @field_validator("GITHUB_PRIVATE_KEY_PATH")
@@ -89,9 +103,8 @@ class Settings(BaseSettings):
             raise ValueError(f"GitHub private key not found at {path}")
         return v
     
-    # Priority order for settings: env vars > env file > defaults
-    class Config:
-        env_file = os.path.join(BASE_DIR, ".env.development")
-        env_file_encoding = "utf-8"
-        case_sensitive = True
-        
+    model_config = {
+        "env_file": os.path.join(BASE_DIR, ".env.development"),
+        "env_file_encoding": "utf-8",
+        "case_sensitive": True,
+    }

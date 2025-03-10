@@ -10,7 +10,8 @@ import logging
 import logging.handlers
 from pathlib import Path
 
-from src.config import get_settings, BASE_DIR
+from src.config import get_settings
+from src.config.constants import BASE_DIR
 
 settings = get_settings()
 
@@ -32,6 +33,7 @@ def configure_logging():
     log_level = getattr(logging, settings.LOG_LEVEL.upper(), logging.INFO)
     
     # Configure root logger
+    logging.getLogger("watchfiles").setLevel(logging.WARNING)
     root_logger = logging.getLogger()
     root_logger.setLevel(log_level)
     

@@ -6,12 +6,12 @@ These settings override the base settings when running in production mode.
 """
 
 import os
-from typing import List, Dict, Any
+from typing import List, Dict
 
 from pydantic import Field, field_validator
 
 from src.config.base import Settings
-from src.config import BASE_DIR
+from src.config.constants import BASE_DIR
 
 
 class ProdSettings(Settings):
@@ -69,7 +69,7 @@ class ProdSettings(Settings):
     )
     
     # CORS Origins validator to support comma-separated string from env vars
-    @field_validator('CORS_ALLOWED_ORIGINS', pre=True)
+    @field_validator('CORS_ALLOWED_ORIGINS',mode="before")
     def parse_cors_origins(cls, v):
         """Parse CORS origins from string to list if needed."""
         if isinstance(v, str):
@@ -77,7 +77,7 @@ class ProdSettings(Settings):
         return v
         
     # Trusted hosts validator to support comma-separated string from env vars
-    @field_validator('TRUSTED_HOSTS', pre=True)
+    @field_validator('TRUSTED_HOSTS', mode="before")
     def parse_trusted_hosts(cls, v):
         """Parse trusted hosts from string to list if needed."""
         if isinstance(v, str):
@@ -85,7 +85,7 @@ class ProdSettings(Settings):
         return v
     
     # Security headers validator to support JSON string from env vars
-    @field_validator('SECURITY_HEADERS', pre=True)
+    @field_validator('SECURITY_HEADERS', mode="before")
     def parse_security_headers(cls, v):
         """Parse security headers from string to dict if needed."""
         if isinstance(v, str):

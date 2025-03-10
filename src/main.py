@@ -6,8 +6,8 @@ sets up routes, and includes a Supabase connection test.
 """
 
 import logging
-from fastapi import FastAPI, Depends, HTTPException, status
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI
+
 
 from src.config import get_settings
 from src.config.middleware import setup_middleware
@@ -34,7 +34,16 @@ setup_middleware(app)
 # Root endpoint
 @app.get("/")
 async def root():
-    """Root endpoint returning basic API information."""
+    """
+    Root endpoint returning basic API information.
+    
+    __returns__:
+        dict: Basic API information including:
+            - name (str): The name of the project.
+            - version (str): The version of the API.
+            - description (str): A brief description of the project.
+            - environment (str): The current environment (e.g., development, production).
+    """
     return {
         "name": settings.PROJECT_NAME,
         "version": getattr(settings, "VERSION", "1.0.0"),
