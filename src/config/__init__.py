@@ -7,14 +7,11 @@ a centralized way to access configuration throughout the application.
 
 import os
 from functools import lru_cache
-from pathlib import Path
 
 from src.config.dev import DevSettings
 from src.config.prod import ProdSettings
 from src.exceptions import ConfigurationError
 
-# Define base project directory
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 
 @lru_cache()

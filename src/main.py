@@ -1,28 +1,64 @@
+"""
+Main application entry point for AlgeLab API.
+
+This module initializes the FastAPI application, configures middleware,
+sets up routes, and includes a Supabase connection test.
+"""
+
+import logging
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 
+
+from src.config import get_settings
+from src.config.middleware import setup_middleware
+from src.config.logging import configure_logging
+
+# Load settings based on environment
+settings = get_settings()
+
+# Configure logging
+loggers = configure_logging()
+logger = logging.getLogger("algelab.main")
+
+# Create FastAPI app
 app = FastAPI(
-    title="FastAPI AlgeLab",
-    description="API for AlgeLab",
-    version="0.1.0"
+    title="AlgeLab API",
+    description="API for AlgeLab - Linear Algebra Learning Platform",
+    version="1.0.0",
+    docs_url="/swagger" if getattr(settings, "SHOW_SWAGGER", False) else None,
+    redoc_url="/redoc" if getattr(settings, "SHOW_SWAGGER", False) else None,
 )
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+setup_middleware(app)
 
+# Root endpoint
 @app.get("/")
-def read_root():
-    return {"Hello": "World"}
+async def root():
+    """
+    Root endpoint returning basic API information.
+    
+    __returns__:
+        dict: Basic API information including:
+            - name (str): The name of the project.
+            - version (str): The version of the API.
+            - description (str): A brief description of the project.
+            - environment (str): The current environment (e.g., development, production).
+    """
+    return {
+        "name": settings.PROJECT_NAME,
+        "version": getattr(settings, "VERSION", "1.0.0"),
+        "description": getattr(settings, "PROJECT_DESCRIPTION", "AlgeLab API"),
+        "environment": settings.Config.env_file.split(".")[-1],
+    }
 
 if __name__ == "__main__":
     import uvicorn
+    
+    logger.info(f"Starting AlgeLab API in {settings.Config.env_file.split('.')[-1]} mode")
+    
     uvicorn.run(
-        app, 
-        host="0.0.0.0", 
+        "src.main:app",
+        host="0.0.0.0",
         port=8000,
-        reload=True)
+        reload=settings.DEBUG
+    )
