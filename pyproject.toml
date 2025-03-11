@@ -1,0 +1,166 @@
+[build-system]
+requires = ["hatchling>=1.12.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "algelab"
+version = "0.1.0"
+description = "An open-source web platform for linear algebra learning"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {file = "LICENSE"}
+authors = [
+    {name = "Mauro Bonilla", email = "maurobonillaolea@outlook.com"},
+]
+maintainers = [
+    {name = "Mauro Bonilla", email = "maurobonillaolea@outlook.com"},
+]
+keywords = ["linear algebra", "education", "math", "web platform"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Education",
+    "Topic :: Scientific/Engineering :: Mathematics",
+]
+dependencies = [
+    "fastapi>=0.109.0",
+    "pydantic>=2.5.0",
+    "pydantic-settings>=2.1.0",
+    "uvicorn>=0.25.0",
+    "httpx>=0.26.0",
+    "python-jose>=3.3.0",
+    "python-multipart>=0.0.6",
+    "supabase>=2.3.0",
+    "loguru>=0.7.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "black==24.1.1",
+    "isort==5.13.2",
+    "mypy==1.8.0",
+    "pytest==8.0.0",
+    "pytest-asyncio==0.23.0",
+    "pytest-cov==4.1.0",
+    "ruff==0.1.14",
+    "pre-commit==3.6.0",
+]
+docs = [
+    "mkdocs==1.5.3",
+    "mkdocs-material==9.5.2",
+    "mkdocstrings[python]==0.23.0",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/Mauro-Bonilla/algelab"
+"Documentation" = "https://github.com/Mauro-Bonilla/algelab/tree/main/docs"
+"Bug Tracker" = "https://github.com/Mauro-Bonilla/algelab/issues"
+"Discord" = "https://discord.gg/Q8F6xm7U"
+
+[project.scripts]
+algelab = "src.main:run_app"
+
+# Tool configurations
+[tool.hatch.build]
+packages = ["src"]
+exclude = [
+    "tests/",
+    "docs/",
+    ".github/",
+    ".vscode/",
+    ".pytest_cache/",
+    "**/.DS_Store",
+    "**/__pycache__/",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+[tool.isort]
+profile = "black"
+line_length = 88
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true
+skip = [
+    ".git", 
+    ".venv", 
+    "venv", 
+    "build", 
+    "dist"
+]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+strict_optional = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+]
+addopts = "--cov=src --cov-report=term-missing"
+
+[tool.ruff]
+target-version = "py310"
+line-length = 88
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "B",   # flake8-bugbear
+    "I",   # isort
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+    "N",   # pep8-naming
+    "SIM", # flake8-simplify
+    "ARG", # flake8-unused-arguments
+]
+exclude = [
+    ".git",
+    ".venv",
+    "venv",
+    "__pycache__",
+    "build",
+    "dist",
+]
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401"] # Unused imports
+
+[tool.ruff.isort]
+known-first-party = ["src"]
+
+[tool.coverage.run]
+source = ["src"]
+omit = ["tests/*", "docs/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "pass",
+    "raise ImportError",
+]
