@@ -2,36 +2,15 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Django Development",
-            "type": "python",
+            "name": "Python Debugger: FastAPI",
+            "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/manage.py",
-            "args": [
-                "runserver",
-                "0.0.0.0:8000"
-            ],
-            "django": true,
-            "autoStartBrowser": false,
+            "program": "${workspaceFolder}/src/main.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
             "env": {
-                "ENVIRONMENT": "development"
-            },
-            "console": "integratedTerminal"
-        },
-        {
-            "name": "Python: Django Production",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/manage.py",
-            "args": [
-                "runserver",
-                "0.0.0.0:8000"
-            ],
-            "django": true,
-            "autoStartBrowser": false,
-            "env": {
-                "ENVIRONMENT": "production"
-            },
-            "console": "integratedTerminal"
+                "PYTHONPATH": "${workspaceFolder}"
+            }
         }
     ]
 }

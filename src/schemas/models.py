@@ -15,6 +15,10 @@ class TokenPayload(BaseModel):
     sub: str = Field(..., description="Subject (user ID)")
     exp: int = Field(..., description="Expiration timestamp")
     
+class TokenResponse(BaseModel):
+    """Token information response."""
+    user_id: str
+    expires_at: int
     
 class Token(BaseModel):
     """Token response model."""
