@@ -39,7 +39,7 @@ class SupabaseClient:
         try:
             self._client = create_client(
                 settings.NEXT_PUBLIC_SUPABASE_URL,
-                settings.NEXT_PUBLIC_SUPABASE_ANON_KEY
+                settings.SUPABASE_SERVICE_ROLE_KEY
             )
             logger.info(f"Initialized Supabase client with URL: {settings.NEXT_PUBLIC_SUPABASE_URL}")
         except Exception as e:
