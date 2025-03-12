@@ -22,8 +22,8 @@ AlgeLab combines interactive learning modules with practical exercises in a digi
 ## Tech Stack
 
 - **Frontend**: React.js
-- **Backend**: Django REST Framework
-- **Database**: PostgreSQL
+- **Backend**: FastAPI (migrated from Django REST Framework)
+- **Database**: PostgreSQL (via Supabase)
 - **Authentication**: GitHub OAuth
 - **Container**: Docker
 - **Deployment**: Azure Web Apps
@@ -36,14 +36,34 @@ git clone https://github.com/your-username/algelab.git
 cd algelab
 ```
 
-2. Set up environment variables (see documentation)
+2. Set up environment variables:
+```bash
+# For development
+cp docs/env_examples/.env.development.example .env.development
+
+# For production
+cp docs/env_examples/.env.production.example .env.production
+```
 
 3. Run with Docker:
 ```bash
 docker compose up
 ```
 
-4. Access the application:
+4. Or run directly with Python:
+```bash
+# Create a virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the application
+python -m src.main
+```
+
+5. Access the application:
 ```
 Development: http://localhost:8000
 Production: https://algelab-react.azurewebsites.net/
@@ -58,16 +78,66 @@ Detailed documentation is available in the `docs` directory:
 - `env_vars.md` - Environment variables setup
 - `github_auth.md` - GitHub authentication configuration
 
+## API Endpoints
+
+The FastAPI backend provides the following key endpoints:
+
+- **Authentication**:
+  - `POST /api/auth/github` - Get GitHub OAuth login URL
+  - `GET /api/auth/github/callback` - GitHub OAuth callback
+  - `POST /api/auth/logout` - Logout user
+  - `GET /api/auth/token` - Get JWT token info
+  - `POST /api/auth/validate-token` - Validate token
+  - `POST /api/auth/refresh-token` - Refresh JWT token
+
+- **User Management**:
+  - `GET /api/user/` - Get current user info
+
+- **Utility**:
+  - `GET /health` - Health check endpoint
+  - `GET /` - API information
+
 ## Related Repositories
 
 - [Frontend (React)](https://github.com/Mauro-Bonilla/practicum-2-react)
-- [Backend (Django)](https://github.com/Mauro-Bonilla/practicum-II-backend)
 - [Animations](https://github.com/Mauro-Bonilla/practicum-II-animations)
 
 ## Community
 
 Join our Discord server for discussions, support, and contributions:
 [AlgeLab Discord](https://discord.gg/Q8F6xm7U)
+
+## Development
+
+### Project Structure
+
+```
+algelab/
+├── docs/                # Documentation
+├── src/                 # Source code
+│   ├── api/             # API endpoints
+│   ├── auth/            # Authentication logic
+│   ├── config/          # Application configuration
+│   ├── db/              # Database interactions
+│   ├── schemas/         # Pydantic models
+│   └── main.py          # Application entry point
+├── .env.development     # Development environment variables
+├── .env.production      # Production environment variables
+├── Dockerfile           # Docker configuration
+└── requirements.txt     # Python dependencies
+```
+
+### Setting Up for Development
+
+1. Configure GitHub OAuth:
+   - Create a GitHub OAuth App (see `docs/github_auth.md`)
+   - Set the callback URL to `http://localhost:8000/api/auth/github/callback`
+   - Update `.env.development` with your GitHub credentials
+
+2. Configure Supabase:
+   - Create a Supabase project
+   - Set up the database schema
+   - Add Supabase credentials to `.env.development`
 
 ## Contributing
 
