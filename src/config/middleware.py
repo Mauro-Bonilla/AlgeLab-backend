@@ -16,6 +16,7 @@ from fastapi.middleware.gzip import GZipMiddleware
 
 from src.config import get_settings
 from src.config.logging import configure_logging
+from src.auth.middleware import AuthMiddleware
 
 settings = get_settings()
 
@@ -39,6 +40,8 @@ def setup_middleware(app: FastAPI):
         allow_headers=settings.CORS_ALLOW_HEADERS,
     )
     
+    # Add authentication middleware
+    app.add_middleware(AuthMiddleware)
     # Add request logging middleware
     app.add_middleware(RequestLoggingMiddleware)
     
