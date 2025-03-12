@@ -1,6 +1,6 @@
 # Deployment Guide
 
-This guide explains how to deploy the Django REST Framework project using Docker, with specific instructions for Azure deployment and general guidance for other platforms.
+This guide explains how to deploy the AlgeLab FastAPI application using Docker, with specific instructions for Azure deployment and general guidance for other platforms.
 
 ## Table of Contents
 - [Prerequisites](#prerequisites)
@@ -57,12 +57,9 @@ RUN chmod 600 /app/algelab-sso.2024-10-02.private-key.pem
 
 # Create directories for logs and set permissions
 RUN mkdir -p /app/logs \
-    && touch /app/logs/django.log \
+    && touch /app/logs/app.log \
     && touch /app/logs/security.log \
     && chmod -R 755 /app/logs
-
-# Make migrations directory writable
-RUN chmod -R 755 /app/algelabApp/migrations
 
 # Create a non-root user and adjust permissions for all files
 RUN useradd -m appuser && chown -R appuser:appuser /app
@@ -73,8 +70,8 @@ USER appuser
 # Expose port
 EXPOSE 8000
 
-# Run the application using Gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "algelab.wsgi:application"]
+# Run the application using Uvicorn
+CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
 ```
 
 ### Building the Docker Image Locally
@@ -197,7 +194,7 @@ Ensure these are configured in your deployment platform:
 
 1. Create a production environment configuration
 2. Set all required environment variables (see `env_vars.md`)
-3. Configure database connection strings
+3. Configure Supabase connection settings
 4. Set up GitHub SSO credentials
 
 ### SSL/TLS Configuration
@@ -209,21 +206,47 @@ For production deployments:
 3. Set security headers
 4. Enable HSTS
 
+## FastAPI-Specific Configuration
+
+### Gunicorn for Production
+
+In production, consider using Gunicorn as a process manager with Uvicorn workers:
+
+```bash
+gunicorn src.main:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
+```
+
+Add to Dockerfile:
+```dockerfile
+# Install Gunicorn
+RUN pip install gunicorn
+
+# Run with Gunicorn
+CMD ["gunicorn", "src.main:app", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8000"]
+```
+
+### API Documentation
+
+FastAPI automatically generates documentation:
+
+- Swagger UI: `/swagger`
+- ReDoc: `/redoc`
+
+You can disable these in production by setting `SHOW_SWAGGER=False` in your environment variables.
+
 ## Monitoring and Maintenance
 
 ### Health Checks
 
-Monitor these endpoints:
+Monitor the health check endpoint:
 
-- `/health/` - Application health
-- `/health/db/` - Database connectivity
-- `/health/cache/` - Cache status
+- `/health` - Application health status
 
 ### Logging
 
 Logs are stored in:
 ```
-/app/logs/django.log
+/app/logs/app.log
 /app/logs/security.log
 ```
 
@@ -252,11 +275,11 @@ Common issues and solutions:
 
 1. **Container fails to start**
    - Check environment variables
-   - Verify database connectivity
+   - Verify Supabase connectivity
    - Check log files
 
 2. **Database connection issues**
-   - Verify connection strings
+   - Verify Supabase connection strings
    - Check network/firewall rules
    - Validate database credentials
 

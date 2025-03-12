@@ -58,7 +58,7 @@ This guide explains how to set up GitHub OAuth and GitHub App authentication for
 
 4. Generate and download private key:
    - Click "Generate a private key"
-   - Save as `algelab-sso.2024-10-02.private-key.pem`
+   - Save your_pem_file
    - Note the App ID
 
 ## Environment Variables
@@ -71,7 +71,7 @@ GITHUB_APP_ID=your_github_app_id
 GITHUB_CLIENT_ID=your_oauth_client_id
 GITHUB_CLIENT_SECRET=your_oauth_client_secret
 GITHUB_REDIRECT_URI=http://localhost:8000/api/auth/github/callback
-GITHUB_PRIVATE_KEY_PATH=./algelab-sso.2024-10-02.private-key.pem
+GITHUB_PRIVATE_KEY_PATH=your_pem_file
 
 # For production, use your domain:
 # GITHUB_REDIRECT_URI=https://your-domain.com/api/auth/github/callback
@@ -167,8 +167,7 @@ Ensure these files are in their correct locations:
 project_root/
 ├── .env.development
 ├── .env.production
-└── algelab-sso.2024-10-02.private-key.pem
-```
+└── your_pem_file
 
 Remember to:
 - Set correct file permissions (600) for the private key
