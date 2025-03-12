@@ -9,17 +9,17 @@ import logging
 from typing import Dict, Any
 from datetime import timedelta
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status, Cookie
 from fastapi.responses import RedirectResponse, JSONResponse
 
-from src.auth.jwt import create_access_token, get_current_user, decode_token
+from src.auth.jwt import create_access_token, get_current_user, decode_token, get_token_from_request
 from src.auth.github import (
     get_github_login_url, get_github_oauth_token, get_github_user,
     create_or_get_user_from_github, GitHubAuthError
 )
 from src.config import get_settings
 from src.config.constants import JWT_TOKEN_COOKIE_NAME
-from src.schemas.models import  ErrorResponse
+from src.schemas.models import ErrorResponse, TokenResponse
 
 settings = get_settings()
 logger = logging.getLogger("algelab.api.auth")
@@ -88,6 +88,9 @@ async def github_callback(code: str, request: Request):
             path="/",
         )
         
+        # Log successful authentication
+        logger.info(f"User {user['user_id']} authenticated successfully via GitHub")
+        
         return response
         
     except GitHubAuthError as e:
@@ -119,6 +122,8 @@ async def logout(
     Returns:
         Success message
     """
+    logger.info(f"User {current_user['user_id']} logged out")
+    
     response.delete_cookie(
         key=JWT_TOKEN_COOKIE_NAME,
         path="/",
@@ -130,10 +135,39 @@ async def logout(
     return {"message": "Successfully logged out"}
 
 
+@router.get("/token", response_model=TokenResponse)
+async def get_token(request: Request):
+    """
+    Get current JWT token information.
+    
+    Args:
+        request: FastAPI request object
+        
+    Returns:
+        Token information if valid
+    """
+    token = get_token_from_request(request)
+    
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="No authentication token found"
+        )
+    
+    try:
+        payload = decode_token(token)
+        return TokenResponse(
+            user_id=payload["sub"],
+            expires_at=payload["exp"]
+        )
+    except HTTPException as e:
+        raise e
+
+
 @router.post("/validate-token", status_code=200)
 async def validate_token(request: Request):
     """
-    Validate JWT token from cookie.
+    Validate JWT token from cookie or header.
     
     Args:
         request: FastAPI request object
@@ -141,7 +175,7 @@ async def validate_token(request: Request):
     Returns:
         Validation result
     """
-    token = request.cookies.get(JWT_TOKEN_COOKIE_NAME)
+    token = get_token_from_request(request)
     
     if not token:
         return JSONResponse(
@@ -150,10 +184,53 @@ async def validate_token(request: Request):
         )
     
     try:
-        decode_token(token)
-        return {"valid": True}
+        payload = decode_token(token)
+        return {"valid": True, "user_id": payload["sub"]}
     except HTTPException as e:
         return JSONResponse(
             status_code=status.HTTP_401_UNAUTHORIZED,
             content={"valid": False, "error": e.detail}
         )
+
+
+@router.post("/refresh-token", status_code=200)
+async def refresh_token(
+    request: Request,
+    response: Response,
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
+    """
+    Refresh JWT token.
+    
+    Args:
+        request: FastAPI request object
+        response: FastAPI response object
+        current_user: Current authenticated user
+        
+    Returns:
+        Success message with new token expiration
+    """
+    # Create new token
+    new_token = create_access_token(
+        subject=current_user["user_id"],
+        expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    )
+    
+    # Set new cookie
+    response.set_cookie(
+        key=JWT_TOKEN_COOKIE_NAME,
+        value=new_token,
+        max_age=settings.COOKIE_MAX_AGE,
+        httponly=settings.COOKIE_HTTPONLY,
+        secure=settings.COOKIE_SECURE,
+        samesite=settings.COOKIE_SAMESITE,
+        path="/",
+    )
+    
+    # Decode token to get expiration
+    payload = decode_token(new_token)
+    
+    return {
+        "message": "Token refreshed successfully",
+        "expires_at": payload["exp"]
+    }

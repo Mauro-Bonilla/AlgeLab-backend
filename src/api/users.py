@@ -8,7 +8,7 @@ and profile management.
 import logging
 from typing import Dict, Any
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 
 from src.auth.jwt import get_current_user
 from src.db.client import get_db_client, SupabaseClientError
@@ -29,11 +29,15 @@ router = APIRouter(
 
 
 @router.get("/", response_model=UserInfo)
-async def get_user_info(current_user: Dict[str, Any] = Depends(get_current_user)):
+async def get_user_info(
+    request: Request,
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
     """
     Get information about the current authenticated user.
     
     Args:
+        request: FastAPI request object
         current_user: Current authenticated user
         
     Returns:
@@ -47,6 +51,7 @@ async def get_user_info(current_user: Dict[str, Any] = Depends(get_current_user)
         user = db_client.get_user(user_id)
         
         if not user:
+            logger.warning(f"User not found in database: {user_id}")
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="User not found"
