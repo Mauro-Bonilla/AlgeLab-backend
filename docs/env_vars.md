@@ -1,12 +1,13 @@
 # Environment Variables Configuration Guide
 
-This guide explains all necessary environment variables required for development and production environments in the AlgeLab project.
+This guide explains all necessary environment variables required for development and production environments in the AlgeLab FastAPI project.
 
 ## Table of Contents
 - [Getting Started](#getting-started)
 - [Environment Files](#environment-files)
 - [Required Variables](#required-variables)
 - [GitHub SSO Configuration](#github-sso-configuration)
+- [Database Configuration](#database-configuration)
 - [Contact Information](#contact-information)
 
 ## Getting Started
@@ -19,38 +20,69 @@ The project uses two environment files:
 
 ### `.env.development`
 ```env
-# Debug Settings
+# Project Metadata
+PROJECT_NAME="AlgeLab"
+PROJECT_DESCRIPTION="An open-source web platform for linear algebra learning"
+VERSION="1.0.0"
+
+# Environment and Debugging
+ENVIRONMENT="development"
 DEBUG=True
+SHOW_SWAGGER=True
+
+# Security
+SECRET_KEY=your_secret_key
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=1400
+RESET_TOKEN_EXPIRE_MINUTES=1400
 ALLOWED_HOSTS=localhost,127.0.0.1
 
-# Database (Default SQLite3, no configuration needed)
-# For PostgreSQL, uncomment and configure:
-# DB_ENGINE=django.db.backends.postgresql
-# DB_NAME=your_dev_db_name
-# DB_USER=your_dev_user
-# DB_PASSWORD=your_dev_password
-# DB_HOST=localhost
-# DB_PORT=5432
+# CORS and CSRF
+CORS_ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000
+CORS_ALLOW_CREDENTIALS=True
+CORS_ALLOW_METHODS=*
+CORS_ALLOW_HEADERS=*
+CSRF_TRUSTED_ORIGINS=http://localhost:5173
+
+# Cookie Settings
+COOKIE_SECURE=False
+COOKIE_HTTPONLY=True
+COOKIE_SAMESITE=lax
+COOKIE_MAX_AGE=3600
 
 # Frontend URL
 FRONTEND_URL=http://localhost:5173
 
-# Cookie Settings
-SESSION_COOKIE_SECURE=False
-CSRF_COOKIE_SECURE=False
-JWT_COOKIE_SECURE=False
-JWT_COOKIE_SAMESITE=Lax
-
-# GitHub OAuth Settings (Required for SSO)
+# GitHub OAuth Settings
 GITHUB_APP_ID=your_github_app_id
 GITHUB_CLIENT_ID=your_github_client_id
 GITHUB_CLIENT_SECRET=your_github_client_secret
 GITHUB_REDIRECT_URI=http://localhost:8000/api/auth/github/callback
 GITHUB_PRIVATE_KEY_PATH=./algelab-sso.2024-10-02.private-key.pem
 
-# CORS and CSRF Settings
-CORS_ALLOWED_ORIGINS=http://localhost:5173
-CSRF_TRUSTED_ORIGINS=http://localhost:5173
+# Supabase Settings
+SUPABASE_URL=your_supabase_url
+POSTGRES_URL=your_postgres_url
+POSTGRES_PRISMA_URL=your_postgres_prisma_url
+NEXT_PUBLIC_SUPABASE_URL=your_public_supabase_url
+POSTGRES_URL_NON_POOLING=your_postgres_url_non_pooling
+SUPABASE_JWT_SECRET=your_supabase_jwt_secret
+POSTGRES_USER=postgres
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+POSTGRES_PASSWORD=your_postgres_password
+POSTGRES_DATABASE=postgres
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+POSTGRES_HOST=your_postgres_host
+
+# Logging
+LOG_LEVEL=INFO
+LOG_FORMAT="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+LOG_FILE=logs/app.log
+
+# Rate Limiting
+RATE_LIMIT_ENABLED=False
+RATE_LIMIT_REQUESTS=100
+RATE_LIMIT_PERIOD=60
 
 # Swagger Settings
 SWAGGER_API_URL=http://localhost:8000
@@ -58,26 +90,42 @@ SWAGGER_API_URL=http://localhost:8000
 
 ### `.env.production`
 ```env
-# Debug Settings
-DEBUG=False
-ALLOWED_HOSTS=your-domain.com,www.your-domain.com
+# Project Metadata
+PROJECT_NAME="AlgeLab"
+PROJECT_DESCRIPTION="An open-source web platform for linear algebra learning"
+VERSION="1.0.0"
 
-# Database Configuration
-DB_ENGINE=django.db.backends.postgresql
-DB_NAME=your_prod_db_name
-DB_USER=your_prod_user
-DB_PASSWORD=your_secure_password
-DB_HOST=your.database.host
-DB_PORT=5432
+# Environment and Debugging
+ENVIRONMENT="production"
+DEBUG=False
+SHOW_SWAGGER=False
+
+# Security
+SECRET_KEY=your_secure_production_key
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=1400
+RESET_TOKEN_EXPIRE_MINUTES=1400
+ALLOWED_HOSTS=your-domain.com,www.your-domain.com
+TRUSTED_HOSTS=your-domain.com,www.your-domain.com
+
+# Security Headers
+SECURITY_HEADERS={"X-Content-Type-Options":"nosniff","X-Frame-Options":"DENY","X-XSS-Protection":"1; mode=block","Strict-Transport-Security":"max-age=31536000; includeSubDomains","Content-Security-Policy":"default-src 'self'; frame-ancestors 'none';","Referrer-Policy":"strict-origin-when-cross-origin"}
+
+# CORS and CSRF
+CORS_ALLOWED_ORIGINS=https://your-frontend-domain.com
+CORS_ALLOW_CREDENTIALS=True
+CORS_ALLOW_METHODS=*
+CORS_ALLOW_HEADERS=*
+CSRF_TRUSTED_ORIGINS=https://your-frontend-domain.com
+
+# Cookie Settings
+COOKIE_SECURE=True
+COOKIE_HTTPONLY=True
+COOKIE_SAMESITE=lax
+COOKIE_MAX_AGE=3600
 
 # Frontend URL
 FRONTEND_URL=https://your-frontend-domain.com
-
-# Cookie Settings
-SESSION_COOKIE_SECURE=True
-CSRF_COOKIE_SECURE=True
-JWT_COOKIE_SECURE=True
-JWT_COOKIE_SAMESITE=Lax
 
 # GitHub OAuth Settings
 GITHUB_APP_ID=your_github_app_id
@@ -86,15 +134,40 @@ GITHUB_CLIENT_SECRET=your_github_client_secret
 GITHUB_REDIRECT_URI=https://your-domain.com/api/auth/github/callback
 GITHUB_PRIVATE_KEY_PATH=./algelab-sso.2024-10-02.private-key.pem
 
-# CORS and CSRF Settings
-CORS_ALLOWED_ORIGINS=https://your-frontend-domain.com
-CSRF_TRUSTED_ORIGINS=https://your-frontend-domain.com
+# Supabase Settings
+SUPABASE_URL=your_supabase_url
+POSTGRES_URL=your_postgres_url
+POSTGRES_PRISMA_URL=your_postgres_prisma_url
+NEXT_PUBLIC_SUPABASE_URL=your_public_supabase_url
+POSTGRES_URL_NON_POOLING=your_postgres_url_non_pooling
+SUPABASE_JWT_SECRET=your_supabase_jwt_secret
+POSTGRES_USER=postgres
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+POSTGRES_PASSWORD=your_postgres_password
+POSTGRES_DATABASE=postgres
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+POSTGRES_HOST=your_postgres_host
 
-# Swagger Settings
-SWAGGER_API_URL=https://your-domain.com
+# Logging
+LOG_LEVEL=INFO
+LOG_FORMAT="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+LOG_FILE=logs/app.log
+
+# Rate Limiting
+RATE_LIMIT_ENABLED=True
+RATE_LIMIT_REQUESTS=60
+RATE_LIMIT_PERIOD=60
 ```
 
 ## Required Variables
+
+### Core Application Settings
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `ENVIRONMENT` | Environment mode (`development` or `production`) | Yes |
+| `SECRET_KEY` | Secret key for cryptographic operations | Yes |
+| `DEBUG` | Enable debug mode | Yes |
+| `ALLOWED_HOSTS` | Comma-separated list of allowed host domains | Yes |
 
 ### GitHub SSO Configuration
 | Variable | Description | Required |
@@ -105,22 +178,27 @@ SWAGGER_API_URL=https://your-domain.com
 | `GITHUB_REDIRECT_URI` | OAuth callback URL | Yes |
 | `GITHUB_PRIVATE_KEY_PATH` | Path to GitHub App private key | Yes |
 
-### Security Settings
+### Supabase Settings
 | Variable | Description | Required |
 |----------|-------------|----------|
-| `SECRET_KEY` | Django secret key | Yes |
-| `DEBUG` | Debug mode flag | Yes |
-| `ALLOWED_HOSTS` | Allowed host domains | Yes |
+| `SUPABASE_URL` | Supabase project URL | Yes |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key | Yes |
+| `NEXT_PUBLIC_SUPABASE_URL` | Public Supabase URL for client-side | Yes |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Anonymous key for Supabase | Yes |
 
-### Database Settings (Production)
+### Frontend Configuration
 | Variable | Description | Required |
 |----------|-------------|----------|
-| `DB_ENGINE` | Database backend | Yes |
-| `DB_NAME` | Database name | Yes |
-| `DB_USER` | Database username | Yes |
-| `DB_PASSWORD` | Database password | Yes |
-| `DB_HOST` | Database host | Yes |
-| `DB_PORT` | Database port | Yes |
+| `FRONTEND_URL` | URL of the frontend application | Yes |
+| `CORS_ALLOWED_ORIGINS` | Comma-separated list of allowed CORS origins | Yes |
+
+### Cookie Settings
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `COOKIE_SECURE` | Set cookies as secure (HTTPS only) | Yes |
+| `COOKIE_HTTPONLY` | Set cookies as HTTP only | Yes |
+| `COOKIE_SAMESITE` | SameSite cookie policy (Lax, Strict, None) | Yes |
+| `COOKIE_MAX_AGE` | Cookie lifetime in seconds | Yes |
 
 ## GitHub SSO Configuration
 
@@ -130,7 +208,10 @@ The project requires the GitHub App private key file:
 algelab-sso.2024-10-02.private-key.pem
 ```
 
-This file should be placed in your project root directory.
+This file should be placed in your project root directory with appropriate permissions:
+```bash
+chmod 600 algelab-sso.2024-10-02.private-key.pem
+```
 
 ### Setting Up GitHub OAuth App
 
@@ -150,6 +231,22 @@ This file should be placed in your project root directory.
 3. Generate a private key
 4. Save the private key as `algelab-sso.2024-10-02.private-key.pem`
 5. Note the App ID
+
+## Database Configuration
+
+The project uses Supabase as a managed PostgreSQL service. You need to configure:
+
+1. Create a Supabase project
+2. Create a `profiles` table with these fields:
+   - `user_id` (text, primary key)
+   - `github_username` (text)
+   - `first_name` (text, nullable)
+   - `last_name` (text, nullable)
+   - `created_at` (timestamp with timezone, default: now())
+   - `updated_at` (timestamp with timezone, nullable)
+
+3. Get your Supabase credentials from the project settings
+4. Add these credentials to your environment files
 
 ## Contact Information
 
